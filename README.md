@@ -47,6 +47,7 @@ ufw enable
    ```
 
    ![Instalacja testowa w środowisku apache](img/apache-certbot-staging.png)
+   ![Niezabezpieczony adres strony](img/niezabezpieczona!.png)
 
    2.1.2 **Lighttpd**:
 
@@ -54,13 +55,14 @@ ufw enable
    certbot certonly --webroot -w /var/www/html -d twoja-domena.pl --staging --agree-tos --register-unsafely-without-email
    ```
 
-2. **Test produkcyjny** (usuń `--staging`):
+3. **Test produkcyjny** (usuń `--staging`):
 
    ```bash
    certbot certonly --webroot -w /var/www/html -d twoja-domena.pl --agree-tos --register-unsafely-without-email
    ```
 
    ![Instalacja w środowisku apache](img/lighttpd-certbot.png)
+   ![Bezpieczna strona](img/bezpieczna.png)
 
 ---
 
