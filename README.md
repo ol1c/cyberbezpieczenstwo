@@ -32,7 +32,8 @@ ufw enable
 3. **Test serwera**
 
    - `http://test.example.pl` powinno wyświetlić stronę Apache.
-     ![Niezabezpieczony adres strony](img/niezabezpieczona.png)
+   
+   ![Niezabezpieczony adres strony](img/niezabezpieczona.png)
 
 ---
 
