@@ -115,7 +115,6 @@ ufw allow OpenSSH; ufw allow 'Apache Full'; ufw enable
 
 2. **Ręczna instalacja**
 
-   - Wygeneruj certyfikat lokalnie (`certbot certonly --manual` z HTTP-01).
    - W cPanelu: **SSL/TLS → Certificates → Upload**, wklej PEM (cert i klucz).
 
 3. **Automatyczne odnawianie**
