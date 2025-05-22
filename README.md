@@ -22,7 +22,11 @@
     ```
 
 ```bash
-ufw allow OpenSSH; ufw allow 'Apache Full'; ufw enable
+ufw allow OpenSSH
+ufw allow 'Apache Full'
+ufw allow 80
+ufw allow 443
+ufw enable
 ```
 
 3. **Test serwera**
