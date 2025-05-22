@@ -32,7 +32,7 @@ ufw enable
 3. **Test serwera**
 
    - `http://test.example.pl` powinno wyświetlić stronę Apache.
-     ! [Niezabezpieczony adres strony] (img/niezabezpieczona.png)
+     ![Niezabezpieczony adres strony](img/niezabezpieczona.png)
 
 ---
 
@@ -46,7 +46,7 @@ ufw enable
    certbot --apache -d twoja-domena.pl --staging --agree-tos --register-unsafely-without-email
    ```
 
-   ! [Instalacja testowa w środowisku apache] (img/apache-certbot-staging.png)
+   ![Instalacja testowa w środowisku apache](img/apache-certbot-staging.png)
 
    2.1.2 **Lighttpd**:
 
@@ -60,7 +60,7 @@ ufw enable
    certbot certonly --webroot -w /var/www/html -d twoja-domena.pl --agree-tos --register-unsafely-without-email
    ```
 
-   ! [Instalacja w środowisku apache] (img/lighttpd-certbot.png)
+   ![Instalacja w środowisku apache](img/lighttpd-certbot.png)
 
 ---
 
@@ -79,7 +79,7 @@ ufw enable
       certbot renew --dry-run
       ```
 
-      ! [Odnowa certyfikatu testowa (dry-run)] (img/dryrun.png)
+      ![Odnowa certyfikatu testowa (dry-run)](img/dryrun.png)
 
    2. Sprawdź status odnawiania:
 
@@ -107,7 +107,7 @@ ufw enable
    openssl x509 -enddate -noout < /etc/letsencrypt/live/twoja-domena.pl/cert.pem
    ```
 
-   ! [Weryfikacja daty wygaśnięcia] (img/enddate.png)
+   ![Weryfikacja daty wygaśnięcia](img/enddate.png)
 
 ---
 
