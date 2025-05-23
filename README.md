@@ -9,17 +9,17 @@
     apt update && apt upgrade -y
     ```
 
-1.  **Instalacja Apache + Certbot**
+- **Instalacja Apache + Certbot**
 
-    ```bash
-    apt install -y apache2 certbot python3-certbot-apache ufw
-    ```
+  ```bash
+  apt install -y apache2 certbot python3-certbot-apache ufw
+  ```
 
-2.  **Instalacja Lighttpd + Certbot**
+- **Instalacja Lighttpd + Certbot**
 
-    ```bash
-    apt install -y lighttpd certbot python3-certbot-lighttpd ufw
-    ```
+  ```bash
+  apt install -y lighttpd certbot python3-certbot-lighttpd ufw
+  ```
 
 ```bash
 ufw allow OpenSSH
@@ -31,8 +31,8 @@ ufw enable
 
 3. **Test serwera**
 
-   - `http://test.example.pl` powinno wyświetlić stronę Apache.
-   
+   `http://test.example.pl` powinno wyświetlić stronę Apache.
+
    ![Niezabezpieczony adres strony](img/niezabezpieczona.png)
 
 ---
@@ -41,22 +41,22 @@ ufw enable
 
 1. **Wstępne testy w trybie staging**:
 
-   2.1.1 **Apache**:
+   - **Apache**:
 
-   ```bash
-   certbot --apache -d twoja-domena.pl --staging --agree-tos --register-unsafely-without-email
-   ```
+     ```bash
+     certbot --apache -d twoja-domena.pl --staging --agree-tos --register-unsafely-without-email
+     ```
 
    ![Instalacja testowa w środowisku apache](img/apache-certbot-staging.png)
    ![Niezabezpieczony adres strony](img/niezabezpieczona!.png)
 
-   2.1.2 **Lighttpd**:
+   - **Lighttpd**:
 
-   ```bash
-   certbot certonly --webroot -w /var/www/html -d twoja-domena.pl --staging --agree-tos --register-unsafely-without-email
-   ```
+     ```bash
+     certbot certonly --webroot -w /var/www/html -d twoja-domena.pl --staging --agree-tos --register-unsafely-without-email
+     ```
 
-3. **Test produkcyjny** (usuń `--staging`):
+2. **Test produkcyjny** (usuń `--staging`):
 
    ```bash
    certbot certonly --webroot -w /var/www/html -d twoja-domena.pl --agree-tos --register-unsafely-without-email
@@ -76,31 +76,31 @@ ufw enable
 
 2. **Aktualizacja (odnawianie) certyfikatu**
 
-   1. Ręczne odnowienie testowe:
+   - Ręczne odnowienie testowe:
 
-      ```bash
-      certbot renew --dry-run
-      ```
+     ```bash
+     certbot renew --dry-run
+     ```
 
-      ![Odnowa certyfikatu testowa (dry-run)](img/dryrun.png)
+     ![Odnowa certyfikatu testowa (dry-run)](img/dryrun.png)
 
-   2. Sprawdź status odnawiania:
+   - Sprawdź status odnawiania:
 
-      ```bash
-      systemctl status certbot.timer
-      ```
+     ```bash
+     systemctl status certbot.timer
+     ```
 
-   3. Jeśli chcesz wymusić natychmiastowe odnowienie (produkcja):
+   - Jeśli chcesz wymusić natychmiastowe odnowienie (produkcja):
 
-      ```bash
-      certbot renew
-      ```
+     ```bash
+     certbot renew
+     ```
 
-   4. Po odnowieniu Apache automatycznie przeładuje skonfigurowane serwisy. W razie potrzeby:
+   - Po odnowieniu Apache automatycznie przeładuje skonfigurowane serwisy. W razie potrzeby:
 
-      ```bash
-      systemctl reload apache2
-      ```
+     ```bash
+     systemctl reload apache2
+     ```
 
 3. **Weryfikacja ważności certyfikatu**
 
@@ -114,18 +114,22 @@ ufw enable
 
 ---
 
-## 4. Instalacja w środowisku hostingowym (cPanel)
+## 4. Instalacja w środowisku hostingowym
 
-1. **AutoSSL**
+1. **Automatyczna instalacja przez AutoSSL (np. w cPanel)**
 
-   - W cPanelu wejdź w **SSL/TLS Status** → **Run AutoSSL** → wybierz Let’s Encrypt.
+   - Zaloguj się do **panelu administracyjnego** (np. cPanel).
 
-2. **Ręczna instalacja**
+   - Przejdź do sekcji **SSL/TLS Status**.
 
-   - W cPanelu: **SSL/TLS → Certificates → Upload**, wklej PEM (cert i klucz).
+   - Wybierz domeny → kliknij **Run AutoSSL**.
 
-3. **Automatyczne odnawianie**
+   - Po kilku minutach certyfikat zostanie zainstalowany automatycznie.
 
-   - Skonfiguruj **AutoSSL** lub crontab przez **Cron Jobs** w panelu.
+   - Odwiedź `https://twoja-domena.pl`, aby potwierdzić działanie certyfikatu.
+
+2. **Odnawianie certyfikatu na hostingu**
+
+   Jeśli **AutoSSL** jest aktywne, odnawia się samo co 60–90 dni.
 
 ---
