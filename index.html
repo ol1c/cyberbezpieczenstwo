@@ -3,12 +3,152 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="md.css">
+    <link rel="stylesheet" href="tomorrow_theme.css">
     <title>Moja strona</title>
+    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
 </head>
 <body>
+    <script>
+    mermaid.initialize({
+        startOnLoad: true,
+        theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+            ? 'dark'
+            : 'default'
+    });
+    </script>
     <h1 style="color:blue">Cyberki - Let's Encrypt</h1>
     <p>Oliwier Komorowski 197808</p>
     <p>Jakub Nowak 197860</p>
     <p>Olivia Jackiewicz 197920</p>
+
+    <p><strong>Projekt – Instalacja i aktualizacja certyfikatu Let's Encrypt dla serwera WWW</strong></p>
+<hr>
+<h2 id="1-instalacja">1. Instalacja</h2>
+<pre><code>```bash
+ssh root@&lt;ADRES_IP&gt;
+apt update &amp;&amp; apt upgrade -y
+```
+</code></pre>
+<ul>
+<li>
+<p><strong>Instalacja Apache + Certbot</strong></p>
+<pre class="hljs"><code><div>apt install -y apache2 certbot python3-certbot-apache ufw
+</div></code></pre>
+</li>
+<li>
+<p><strong>Instalacja Lighttpd + Certbot</strong></p>
+<pre class="hljs"><code><div>apt install -y lighttpd certbot python3-certbot-lighttpd ufw
+</div></code></pre>
+</li>
+</ul>
+<pre class="hljs"><code><div>ufw allow OpenSSH
+ufw allow <span class="hljs-string">'Apache Full'</span>
+ufw allow 80
+ufw allow 443
+ufw <span class="hljs-built_in">enable</span>
+</div></code></pre>
+<ol start="3">
+<li>
+<p><strong>Test serwera</strong></p>
+<p><code>http://test.example.pl</code> powinno wyświetlić stronę Apache.</p>
+</li>
+</ol>
+<hr>
+<h2 id="2-instalacja-certyfikatu-na-serwerach-www">2. Instalacja certyfikatu na serwerach WWW</h2>
+<ol>
+<li>
+<p><strong>Wstępne testy w trybie staging</strong>:</p>
+<ul>
+<li>
+<p><strong>Apache</strong>:</p>
+<pre class="hljs"><code><div>certbot --apache -d twoja-domena.pl --staging --agree-tos --register-unsafely-without-email
+</div></code></pre>
+</li>
+<li>
+<p><strong>Lighttpd</strong>:</p>
+<pre class="hljs"><code><div>certbot certonly --webroot -w /var/www/html -d twoja-domena.pl --staging --agree-tos --register-unsafely-without-email
+</div></code></pre>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Test produkcyjny</strong> (usuń <code>--staging</code>):</p>
+<pre class="hljs"><code><div>certbot certonly --webroot -w /var/www/html -d twoja-domena.pl --agree-tos --register-unsafely-without-email
+</div></code></pre>
+</li>
+</ol>
+<hr>
+<h2 id="3-odnawianie-certyfikatu">3. Odnawianie certyfikatu</h2>
+<ol>
+<li>
+<p><strong>Automatyczne (<code>certbot renew</code>)</strong></p>
+<ul>
+<li>Domyślnie zainstalowane cron/systemd timer.</li>
+<li>Sprawdź: <code>systemctl status certbot.timer</code>.</li>
+</ul>
+</li>
+<li>
+<p><strong>Aktualizacja (odnawianie) certyfikatu</strong></p>
+<ul>
+<li>
+<p>Ręczne odnowienie testowe:</p>
+<pre class="hljs"><code><div>certbot renew --dry-run
+</div></code></pre>
+</li>
+<li>
+<p>Sprawdź status odnawiania:</p>
+<pre class="hljs"><code><div>systemctl status certbot.timer
+</div></code></pre>
+</li>
+<li>
+<p>Jeśli chcesz wymusić natychmiastowe odnowienie (produkcja):</p>
+<pre class="hljs"><code><div>certbot renew
+</div></code></pre>
+</li>
+<li>
+<p>Po odnowieniu Apache automatycznie przeładuje skonfigurowane serwisy. W razie potrzeby:</p>
+<pre class="hljs"><code><div>systemctl reload apache2
+</div></code></pre>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Weryfikacja ważności certyfikatu</strong></p>
+<p>Sprawdź datę wygaśnięcia:</p>
+<pre class="hljs"><code><div>openssl x509 -enddate -noout &lt; /etc/letsencrypt/live/twoja-domena.pl/cert.pem
+</div></code></pre>
+</li>
+</ol>
+<hr>
+<h2 id="4-instalacja-w-%C5%9Brodowisku-hostingowym">4. Instalacja w środowisku hostingowym</h2>
+<ol>
+<li>
+<p><strong>Automatyczna instalacja przez AutoSSL (np. w cPanel)</strong></p>
+<ul>
+<li>
+<p>Zaloguj się do <strong>panelu administracyjnego</strong> (np. cPanel).</p>
+</li>
+<li>
+<p>Przejdź do sekcji <strong>SSL/TLS Status</strong>.</p>
+</li>
+<li>
+<p>Wybierz domeny → kliknij <strong>Run AutoSSL</strong>.</p>
+</li>
+<li>
+<p>Po kilku minutach certyfikat zostanie zainstalowany automatycznie.</p>
+</li>
+<li>
+<p>Odwiedź <code>https://twoja-domena.pl</code>, aby potwierdzić działanie certyfikatu.</p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Odnawianie certyfikatu na hostingu</strong></p>
+<p>Jeśli <strong>AutoSSL</strong> jest aktywne, odnawia się samo co 60–90 dni.</p>
+</li>
+</ol>
+<hr>
 </body>
 </html>
