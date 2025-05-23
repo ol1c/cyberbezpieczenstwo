@@ -19,14 +19,14 @@
 8. [Podsumowanie](#podsumowanie)
 
 ---
-## **1. Wstęp** {#wstep}
+## 1. Wstęp
 
 Certyfikaty SSL (Secure Socket Layer) są kluczowym elementem bezpieczeństwa w sieci, umożliwiającym szyfrowaną komunikację pomiędzy użytkownikiem a serwerem WWW. Let's Encrypt to darmowy, automatyczny i otwarty dostawca certyfikatów SSL.
 
 Niniejszy dokument przedstawia proces instalacji, aktualizacji i odnowienia certyfikatów Let's Encrypt z wykorzystaniem różnych serwerów WWW oraz środowisk hostingowych.
   
 ---
-## **2. Wprowadzenie do Let's Encrypt** {#wprowadzenie-do-lets-encrypt}
+## 2. Wprowadzenie do Let's Encrypt
 
 Let's Encrypt to urząd certyfikacji (CA), który oferuje:
 
@@ -38,13 +38,13 @@ Jego głównym celem jest uproszczenie wdrażania HTTPS, szczególnie przez mał
 
   
 ---
-## **3. Metody weryfikacji własności domeny** {#metody-weryfikacji-własności-domeny}
+## 3. Metody weryfikacji własności domeny
   
 
 Przed wydaniem certyfikatu Let's Encrypt wymaga potwierdzenia, że domena należy do osoby składającej żądanie. Obsługiwane są trzy główne metody:
   
 
-### **3.1 HTTP-01**
+### 3.1 HTTP-01
   
 
 - Polega na umieszczeniu pliku z tokenem w katalogu `.well-known/acme-challenge/` na serwerze HTTP.
@@ -56,7 +56,7 @@ Przed wydaniem certyfikatu Let's Encrypt wymaga potwierdzenia, że domena należ
 **Wady:** brak obsługi wildcard, konieczność działającego serwera HTTP.
 
   
-### **3.2 DNS-01**
+### 3.2 DNS-01
 
 
 - Polega na dodaniu rekordu TXT `_acme-challenge` do strefy DNS domeny.
@@ -68,7 +68,7 @@ Przed wydaniem certyfikatu Let's Encrypt wymaga potwierdzenia, że domena należ
 **Wady:** wymaga dostępu do konfiguracji DNS, propagacja może trwać.
 
 
-### **3.3 TLS-ALPN-01**
+### 3.3 TLS-ALPN-01
 
 - Opiera się na specjalnym rozszerzeniu TLS.
 - Wymaga nasłuchiwania na porcie **443** z odpowiednią konfiguracją TLS.
@@ -86,16 +86,16 @@ Przed wydaniem certyfikatu Let's Encrypt wymaga potwierdzenia, że domena należ
 | TLS-ALPN-01   | Nie      | 443            | Wysoka   | Wysoka (Caddy)      |
   
 ---
-## **4. Instalacja certyfikatu Let's Encrypt** {#instalacja-certyfikatu-lets-encrypt}
+## 4. Instalacja certyfikatu Let's Encrypt
 
-### **4.1 Przygotowanie systemu**
+### 4.1 Przygotowanie systemu
 
 ```shell
 ssh  root@<ADRES_IP>
 apt  update && apt  upgrade  -y
 ```
 
-### **4.2 Instalacja narzędzi**
+### 4.2 Instalacja narzędzi
 
   
 
@@ -126,7 +126,7 @@ Po wykonaniu powyższych czynności strona prezentuje się następująco:
 ![Niezabezpieczony adres strony](img/niezabezpieczona.png)
   
 
-### **4.3 Środowiska Let's Encrypt: Staging vs Production**
+### 4.3 Środowiska Let's Encrypt: Staging vs Production
 
 Let's Encrypt oferuje dwa środowiska:
 
@@ -146,17 +146,17 @@ certbot  --apache  -d  domena.pl  --staging
 ```
 
 ---
-## **5. Instalacja certyfikatu na serwerze WWW** {#instalacja-certyfikatu-na-serwerze-www}
+## 5. Instalacja certyfikatu na serwerze WWW
 
   
-### **5.1 Różnica Apache vs Lighttpd**
+### 5.1 Różnica Apache vs Lighttpd
 
   
 -  **Apache** to rozbudowany, popularny serwer WWW z szerokim wsparciem dla modułów, np. mod_ssl, mod_rewrite. Domyślny wybór w wielu systemach.
 -  **Lighttpd** to lekki, szybki serwer zoptymalizowany do środowisk o ograniczonych zasobach. Mniej popularny, ale wydajny i prostszy w konfiguracji.
 
   
-### **5.2 Tryb staging**
+### 5.2 Tryb staging
 
 
 **Apache:**
@@ -181,7 +181,7 @@ Po wykonaniu powyższych kroków otrzymujemy rezultat:
 ![Niezabezpieczony adres strony](img/niezabezpieczona!.png)
 
 
-### **5.3 Tryb produkcyjny**
+### 5.3 Tryb produkcyjny
 
 Jak widzimy powyżej, pozostanie na środowisku testowym uniemożliwia odpalenie certyfikatu. Należy przejść na tryb produkcyjny usuwając `--staging`.  
   - np. Lighttpd:
@@ -196,7 +196,7 @@ Strona jest już **zabezpieczona**
 
 ![Bezpieczna strona](img/bezpieczna.png)
 
-### **5.4 Caddy**
+### 5.4 Caddy
 
   
 
@@ -231,13 +231,13 @@ Uruchomienie:
 Certyfikat zostanie automatycznie pobrany i aktywowany.
 
 ---
-## **6. Odnawianie certyfikatu** {#odnawianie-certyfikatu}
+## 6. Odnawianie certyfikatu
 
 
 Certyfikaty Let's Encrypt są ważne przez 90 dni. Zalecane jest automatyczne odnawianie.
 
 
-### **6.1 Automatyczne odnawianie (certbot)**
+### 6.1 Automatyczne odnawianie (certbot)
 
 
 Certbot instaluje domyślnie `certbot.timer`:
@@ -248,7 +248,7 @@ systemctl  status  certbot.timer
 ```
 
 
-### **6.2 Ręczne testowe odnowienie**
+### 6.2 Ręczne testowe odnowienie
 
 
 ```shell
@@ -257,14 +257,14 @@ certbot  renew  --dry-run
 
   
 
-### **6.3 Produkcyjne odnowienie**
+### 6.3 Produkcyjne odnowienie
 
 
 ```shell
 certbot  renew
 ```
 
-### **6.4 Sprawdzenie ważności certyfikatu**
+### 6.4 Sprawdzenie ważności certyfikatu
 
 
 ```shell
@@ -274,11 +274,11 @@ openssl  x509  -enddate  -noout < /etc/letsencrypt/live/twoja-domena.pl/cert.pem
 
 
 ---
-## **7. Instalacja certyfikatu w środowisku hostingowym** {#instalacja-certyfikatu-w-środowisku-hostingowym}
+## 7. Instalacja certyfikatu w środowisku hostingowym
 
   
 
-### **7.1 AutoSSL w cPanel**
+### 7.1 AutoSSL w cPanel
 
   
 
@@ -294,13 +294,13 @@ openssl  x509  -enddate  -noout < /etc/letsencrypt/live/twoja-domena.pl/cert.pem
 
   
 
-### **7.2 Odnawianie**
+### 7.2 Odnawianie
 
 Większość hostingów odnawia AutoSSL automatycznie co 60–90 dni.
 
 
 ---
-## **8. Podsumowanie** {#podsumowanie}
+## 8. Podsumowanie
 
 
 Let's Encrypt to nowoczesne, darmowe i bezpieczne rozwiązanie do zapewnienia komunikacji HTTPS. Obsługuje wiele metod weryfikacji własności domeny, co pozwala dopasować proces do konkretnego środowiska.
