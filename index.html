@@ -18,137 +18,218 @@
             : 'default'
     });
     </script>
-    <h1 style="color:blue">Cyberki - Let's Encrypt</h1>
+    <h1 style="color:blue">Cyberki - Instalacja i aktualizacja certyfikatu Let's Encrypt dla serwera WWW</h1>
     <p>Oliwier Komorowski 197808</p>
     <p>Jakub Nowak 197860</p>
     <p>Olivia Jackiewicz 197920</p>
-
-    <p><strong>Projekt – Instalacja i aktualizacja certyfikatu Let's Encrypt dla serwera WWW</strong></p>
-<hr>
-<h2 id="1-instalacja">1. Instalacja</h2>
-<pre><code>```bash
-ssh root@&lt;ADRES_IP&gt;
-apt update &amp;&amp; apt upgrade -y
-```
-</code></pre>
-<ul>
-<li>
-<p><strong>Instalacja Apache + Certbot</strong></p>
-<pre class="hljs"><code><div>apt install -y apache2 certbot python3-certbot-apache ufw
-</div></code></pre>
-</li>
-<li>
-<p><strong>Instalacja Lighttpd + Certbot</strong></p>
-<pre class="hljs"><code><div>apt install -y lighttpd certbot python3-certbot-lighttpd ufw
-</div></code></pre>
-</li>
-</ul>
-<pre class="hljs"><code><div>ufw allow OpenSSH
-ufw allow <span class="hljs-string">'Apache Full'</span>
-ufw allow 80
-ufw allow 443
-ufw <span class="hljs-built_in">enable</span>
-</div></code></pre>
-<ol start="3">
-<li>
-<p><strong>Test serwera</strong></p>
-<p><code>http://test.example.pl</code> powinno wyświetlić stronę Apache.</p>
-</li>
+<p><img src="https://media1.tenor.com/m/makOt5I5C0wAAAAd/gorilla-spin-gorilla.gif" alt="spinning gorilla"></p>
+<h2 id="spis-tre%C5%9Bci"><strong>Spis treści</strong></h2>
+<ol>
+<li><a href="#wstep">Wstęp</a></li>
+<li><a href="#wprowadzenie-do-lets-encrypt">Wprowadzenie do Let's Encrypt</a></li>
+<li><a href="#metody-weryfikacji-w%C5%82asno%C5%9Bci-domeny">Metody weryfikacji własności domeny</a></li>
+<li><a href="#instalacja-certyfikatu-lets-encrypt">Instalacja certyfikatu Let's Encrypt</a></li>
+<li><a href="#instalacja-certyfikatu-na-serwerze-www">Instalacja certyfikatu na serwerze WWW (Apache, Lighttpd, Caddy)</a></li>
+<li><a href="#odnawianie-certyfikatu">Odnawianie certyfikatu</a></li>
+<li><a href="#instalacja-certyfikatu-w-%C5%9Brodowisku-hostingowym">Instalacja certyfikatu w środowisku hostingowym</a></li>
+<li><a href="#podsumowanie">Podsumowanie</a></li>
 </ol>
 <hr>
-<h2 id="2-instalacja-certyfikatu-na-serwerach-www">2. Instalacja certyfikatu na serwerach WWW</h2>
-<ol>
-<li>
-<p><strong>Wstępne testy w trybie staging</strong>:</p>
+<h2 id="1-wst%C4%99p">1. Wstęp</h2>
+<p>Certyfikaty SSL (Secure Socket Layer) są kluczowym elementem bezpieczeństwa w sieci, umożliwiającym szyfrowaną komunikację pomiędzy użytkownikiem a serwerem WWW. Let's Encrypt to darmowy, automatyczny i otwarty dostawca certyfikatów SSL.</p>
+<p>Niniejszy dokument przedstawia proces instalacji, aktualizacji i odnowienia certyfikatów Let's Encrypt z wykorzystaniem różnych serwerów WWW oraz środowisk hostingowych.</p>
+<hr>
+<h2 id="2-wprowadzenie-do-lets-encrypt">2. Wprowadzenie do Let's Encrypt</h2>
+<p>Let's Encrypt to urząd certyfikacji (CA), który oferuje:</p>
+<ul>
+<li>Bezpłatne certyfikaty ważne 90 dni,</li>
+<li>Automatyzację wystawiania i odnawiania certyfikatów za pomocą protokołu ACME,</li>
+<li>Otwartość i transparentność działania (publiczny rejestr wydanych certyfikatów).</li>
+</ul>
+<p>Jego głównym celem jest uproszczenie wdrażania HTTPS, szczególnie przez małe strony i projekty.</p>
+<hr>
+<h2 id="3-metody-weryfikacji-w%C5%82asno%C5%9Bci-domeny">3. Metody weryfikacji własności domeny</h2>
+<p>Przed wydaniem certyfikatu Let's Encrypt wymaga potwierdzenia, że domena należy do osoby składającej żądanie. Obsługiwane są trzy główne metody:</p>
+<h3 id="31-http-01">3.1 HTTP-01</h3>
+<ul>
+<li>Polega na umieszczeniu pliku z tokenem w katalogu <code>.well-known/acme-challenge/</code> na serwerze HTTP.</li>
+<li>Let's Encrypt wysyła żądanie HTTP do serwera i weryfikuje obecność tokena.</li>
+<li>Wymaga otwartego portu <strong>80</strong>.</li>
+</ul>
+<p><strong>Zalety:</strong> prostota i szybkość, dobra automatyzacja.</p>
+<p><strong>Wady:</strong> brak obsługi wildcard, konieczność działającego serwera HTTP.</p>
+<h3 id="32-dns-01">3.2 DNS-01</h3>
 <ul>
 <li>
-<p><strong>Apache</strong>:</p>
-<pre class="hljs"><code><div>certbot --apache -d twoja-domena.pl --staging --agree-tos --register-unsafely-without-email
-</div></code></pre>
+<p>Polega na dodaniu rekordu TXT <code>_acme-challenge</code> do strefy DNS domeny.</p>
 </li>
 <li>
-<p><strong>Lighttpd</strong>:</p>
-<pre class="hljs"><code><div>certbot certonly --webroot -w /var/www/html -d twoja-domena.pl --staging --agree-tos --register-unsafely-without-email
-</div></code></pre>
+<p>Let's Encrypt sprawdza zawartość rekordu.</p>
 </li>
 </ul>
-</li>
-<li>
-<p><strong>Test produkcyjny</strong> (usuń <code>--staging</code>):</p>
+<p><strong>Zalety:</strong> możliwość wystawiania certyfikatów wildcard, nie wymaga portu 80.</p>
+<p><strong>Wady:</strong> wymaga dostępu do konfiguracji DNS, propagacja może trwać.</p>
+<h3 id="33-tls-alpn-01">3.3 TLS-ALPN-01</h3>
+<ul>
+<li>Opiera się na specjalnym rozszerzeniu TLS.</li>
+<li>Wymaga nasłuchiwania na porcie <strong>443</strong> z odpowiednią konfiguracją TLS.</li>
+<li>Rzadziej stosowana, wspierana np. przez serwer Caddy.</li>
+</ul>
+<h4 id="por%C3%B3wnanie-metod">Porównanie metod</h4>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Metoda</th>
+<th style="text-align:center">Wildcard</th>
+<th style="text-align:center">Potrzebny port</th>
+<th style="text-align:center">Szybkość</th>
+<th style="text-align:left">Automatyzacja</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">HTTP-01</td>
+<td style="text-align:center">Nie</td>
+<td style="text-align:center">80</td>
+<td style="text-align:center">Wysoka</td>
+<td style="text-align:left">Wysoka</td>
+</tr>
+<tr>
+<td style="text-align:left">DNS-01</td>
+<td style="text-align:center">Tak</td>
+<td style="text-align:center">brak</td>
+<td style="text-align:center">Średnia</td>
+<td style="text-align:left">Niższa</td>
+</tr>
+<tr>
+<td style="text-align:left">TLS-ALPN-01</td>
+<td style="text-align:center">Nie</td>
+<td style="text-align:center">443</td>
+<td style="text-align:center">Wysoka</td>
+<td style="text-align:left">Wysoka (Caddy)</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="4-instalacja-certyfikatu-lets-encrypt">4. Instalacja certyfikatu Let's Encrypt</h2>
+<h3 id="41-przygotowanie-systemu">4.1 Przygotowanie systemu</h3>
+<pre class="hljs"><code><div>ssh  root@&lt;ADRES_IP&gt;
+apt  update &amp;&amp; apt  upgrade  -y
+</div></code></pre>
+<h3 id="42-instalacja-narz%C4%99dzi">4.2 Instalacja narzędzi</h3>
+<p><strong>Apache:</strong></p>
+<pre class="hljs"><code><div>apt  install  -y  apache2  certbot  python3-certbot-apache  ufw
+</div></code></pre>
+<p><strong>Lighttpd:</strong></p>
+<pre class="hljs"><code><div>apt  install  -y  lighttpd  certbot  python3-certbot-lighttpd  ufw
+</div></code></pre>
+<p><strong>Zapora:</strong></p>
+<pre class="hljs"><code><div>ufw  allow  OpenSSH
+ufw  allow  'Apache Full'
+ufw  allow  80
+ufw  allow  443
+ufw  enable
+</div></code></pre>
+<p>Po wykonaniu powyższych czynności strona prezentuje się następująco:</p>
+<p><img src="https://raw.githubusercontent.com/ol1c/cyberbezpieczenstwo/refs/heads/main/img/niezabezpieczona.png" alt="Niezabezpieczony adres strony"></p>
+<h3 id="43-%C5%9Brodowiska-lets-encrypt-staging-vs-production">4.3 Środowiska Let's Encrypt: Staging vs Production</h3>
+<p>Let's Encrypt oferuje dwa środowiska:</p>
+<ul>
+<li><strong>Staging:</strong> do testowania konfiguracji, pozwala uniknąć limitów produkcyjnych. Certyfikaty są nieważne w przeglądarkach.</li>
+<li><strong>Production:</strong> generuje prawdziwe, zaufane certyfikaty. Obowiązują limity (np. 50 certyfikatów na domenę tygodniowo).</li>
+</ul>
+<p>Użycie flagi <code>--staging</code> jest zalecane przy pierwszych testach i automatyzacji:</p>
+<pre class="hljs"><code><div>certbot  --apache  -d  domena.pl  --staging
+</div></code></pre>
+<hr>
+<h2 id="5-instalacja-certyfikatu-na-serwerze-www">5. Instalacja certyfikatu na serwerze WWW</h2>
+<h3 id="51-r%C3%B3%C5%BCnica-apache-vs-lighttpd">5.1 Różnica Apache vs Lighttpd</h3>
+<ul>
+<li><strong>Apache</strong> to rozbudowany, popularny serwer WWW z szerokim wsparciem dla modułów, np. mod_ssl, mod_rewrite. Domyślny wybór w wielu systemach.</li>
+<li><strong>Lighttpd</strong> to lekki, szybki serwer zoptymalizowany do środowisk o ograniczonych zasobach. Mniej popularny, ale wydajny i prostszy w konfiguracji.</li>
+</ul>
+<h3 id="52-tryb-staging">5.2 Tryb staging</h3>
+<p><strong>Apache:</strong></p>
+<pre class="hljs"><code><div>certbot  --apache  -d  twoja-domena.pl  --staging  --agree-tos  --register-unsafely-without-email
+</div></code></pre>
+<p><img src="https://raw.githubusercontent.com/ol1c/cyberbezpieczenstwo/refs/heads/main/img/apache-certbot-staging.png" alt="Instalacja testowa w środowisku apache"></p>
+<p><strong>Lighttpd (webroot)</strong></p>
+<pre class="hljs"><code><div>certbot  certonly  --webroot  -w  /var/www/html  -d  twoja-domena.pl  --agree-tos  --register-unsafely-without-email
+</div></code></pre>
+<p>Po wykonaniu powyższych kroków otrzymujemy rezultat:</p>
+<p><img src="https://raw.githubusercontent.com/ol1c/cyberbezpieczenstwo/refs/heads/main/img/niezabezpieczona!.png" alt="Niezabezpieczony adres strony"></p>
+<h3 id="53-tryb-produkcyjny">5.3 Tryb produkcyjny</h3>
+<p>Jak widzimy powyżej, pozostanie na środowisku testowym uniemożliwia odpalenie certyfikatu. Należy przejść na tryb produkcyjny usuwając <code>--staging</code>.</p>
+<ul>
+<li>np. Lighttpd:</li>
+</ul>
 <pre class="hljs"><code><div>certbot certonly --webroot -w /var/www/html -d twoja-domena.pl --agree-tos --register-unsafely-without-email
 </div></code></pre>
-</li>
-</ol>
-<hr>
-<h2 id="3-odnawianie-certyfikatu">3. Odnawianie certyfikatu</h2>
-<ol>
-<li>
-<p><strong>Automatyczne (<code>certbot renew</code>)</strong></p>
-<ul>
-<li>Domyślnie zainstalowane cron/systemd timer.</li>
-<li>Sprawdź: <code>systemctl status certbot.timer</code>.</li>
-</ul>
-</li>
-<li>
-<p><strong>Aktualizacja (odnawianie) certyfikatu</strong></p>
+<p><img src="https://raw.githubusercontent.com/ol1c/cyberbezpieczenstwo/refs/heads/main/img/lighttpd-certbot.png" alt="Instalacja w środowisku apache"></p>
+<p>Strona jest już <strong>zabezpieczona</strong></p>
+<p><img src="https://raw.githubusercontent.com/ol1c/cyberbezpieczenstwo/refs/heads/main/img/bezpieczna.png" alt="Bezpieczna strona"></p>
+<h3 id="54-caddy">5.4 Caddy</h3>
+<p>Caddy to serwer WWW, który automatyzuje uzyskiwanie i odnawianie certyfikatów Let's Encrypt:</p>
 <ul>
 <li>
-<p>Ręczne odnowienie testowe:</p>
-<pre class="hljs"><code><div>certbot renew --dry-run
-</div></code></pre>
+<p>Obsługuje HTTP-01 i TLS-ALPN-01.</p>
 </li>
 <li>
-<p>Sprawdź status odnawiania:</p>
-<pre class="hljs"><code><div>systemctl status certbot.timer
-</div></code></pre>
-</li>
-<li>
-<p>Jeśli chcesz wymusić natychmiastowe odnowienie (produkcja):</p>
-<pre class="hljs"><code><div>certbot renew
-</div></code></pre>
-</li>
-<li>
-<p>Po odnowieniu Apache automatycznie przeładuje skonfigurowane serwisy. W razie potrzeby:</p>
-<pre class="hljs"><code><div>systemctl reload apache2
-</div></code></pre>
+<p>Wystarczy odpowiedni wpis w <code>Caddyfile</code>, np.:</p>
 </li>
 </ul>
-</li>
-<li>
-<p><strong>Weryfikacja ważności certyfikatu</strong></p>
-<p>Sprawdź datę wygaśnięcia:</p>
-<pre class="hljs"><code><div>openssl x509 -enddate -noout &lt; /etc/letsencrypt/live/twoja-domena.pl/cert.pem
+<pre class="hljs"><code><div>example.com {
+root * /var/www/html
+file_server
+tls user@example.com
+}
 </div></code></pre>
-</li>
-</ol>
+<p>Uruchomienie:</p>
+<pre class="hljs"><code><div>./caddy  run
+</div></code></pre>
+<p>Certyfikat zostanie automatycznie pobrany i aktywowany.</p>
 <hr>
-<h2 id="4-instalacja-w-%C5%9Brodowisku-hostingowym">4. Instalacja w środowisku hostingowym</h2>
-<ol>
-<li>
-<p><strong>Automatyczna instalacja przez AutoSSL (np. w cPanel)</strong></p>
+<h2 id="6-odnawianie-certyfikatu">6. Odnawianie certyfikatu</h2>
+<p>Certyfikaty Let's Encrypt są ważne przez 90 dni. Zalecane jest automatyczne odnawianie.</p>
+<h3 id="61-automatyczne-odnawianie-certbot">6.1 Automatyczne odnawianie (certbot)</h3>
+<p>Certbot instaluje domyślnie <code>certbot.timer</code>:</p>
+<pre class="hljs"><code><div>systemctl  status  certbot.timer
+</div></code></pre>
+<h3 id="62-r%C4%99czne-testowe-odnowienie">6.2 Ręczne testowe odnowienie</h3>
+<pre class="hljs"><code><div>certbot  renew  --dry-run
+</div></code></pre>
+<h3 id="63-produkcyjne-odnowienie">6.3 Produkcyjne odnowienie</h3>
+<pre class="hljs"><code><div>certbot  renew
+</div></code></pre>
+<h3 id="64-sprawdzenie-wa%C5%BCno%C5%9Bci-certyfikatu">6.4 Sprawdzenie ważności certyfikatu</h3>
+<pre class="hljs"><code><div>openssl  x509  -enddate  -noout &lt; /etc/letsencrypt/live/twoja-domena.pl/cert.pem
+</div></code></pre>
+<hr>
+<h2 id="7-instalacja-certyfikatu-w-%C5%9Brodowisku-hostingowym">7. Instalacja certyfikatu w środowisku hostingowym</h2>
+<h3 id="71-autossl-w-cpanel">7.1 AutoSSL w cPanel</h3>
 <ul>
 <li>
-<p>Zaloguj się do <strong>panelu administracyjnego</strong> (np. cPanel).</p>
+<p>Zaloguj się do <strong>cPanel</strong>.</p>
 </li>
 <li>
-<p>Przejdź do sekcji <strong>SSL/TLS Status</strong>.</p>
+<p>Przejdź do <strong>SSL/TLS Status</strong>.</p>
 </li>
 <li>
-<p>Wybierz domeny → kliknij <strong>Run AutoSSL</strong>.</p>
+<p>Zaznacz domeny i kliknij <strong>Run AutoSSL</strong>.</p>
 </li>
 <li>
-<p>Po kilku minutach certyfikat zostanie zainstalowany automatycznie.</p>
+<p>Certyfikat zostanie zainstalowany automatycznie.</p>
 </li>
 <li>
-<p>Odwiedź <code>https://twoja-domena.pl</code>, aby potwierdzić działanie certyfikatu.</p>
+<p>Odwiedź <code>https://twoja-domena.pl</code>, aby zweryfikować działanie.</p>
 </li>
 </ul>
-</li>
-<li>
-<p><strong>Odnawianie certyfikatu na hostingu</strong></p>
-<p>Jeśli <strong>AutoSSL</strong> jest aktywne, odnawia się samo co 60–90 dni.</p>
-</li>
-</ol>
+<h3 id="72-odnawianie">7.2 Odnawianie</h3>
+<p>Większość hostingów odnawia AutoSSL automatycznie co 60–90 dni.</p>
 <hr>
+<h2 id="8-podsumowanie">8. Podsumowanie</h2>
+<p>Let's Encrypt to nowoczesne, darmowe i bezpieczne rozwiązanie do zapewnienia komunikacji HTTPS. Obsługuje wiele metod weryfikacji własności domeny, co pozwala dopasować proces do konkretnego środowiska.
+Certbot, Apache, Lighttpd, Caddy oraz panele hostingowe takie jak cPanel umożliwiają szybkie i skuteczne wdrożenie certyfikatu SSL dla każdej strony WWW.</p>
+
 </body>
 </html>
