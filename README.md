@@ -1,11 +1,5 @@
 # Instalacja i aktualizacja certyfikatu Let's Encrypt dla serwera WWW
 
-*Olivia Jackiewicz 197920*
-
-*Oliwier Komorowski 197808*
-
-*Jakub Nowak 197860*
-
 
 ## **Spis treści**
 
